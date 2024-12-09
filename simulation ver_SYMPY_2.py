@@ -15,7 +15,7 @@ Ml=3e8
 #模擬間隔
 #t=int(input('interval(s) = '))
 t=600
-
+#模擬次數
 times=round(86400*30/t)
 clock=np.arange(1.,times,1.)
 #短波輻射(W/m2)
@@ -28,7 +28,7 @@ Sr = 0
 a = 0.3
 #常數
 e=5.67e-8
-#初始溫度(K)
+#畫圖用陣列
 Toa=np.arange(1.,times,1.)
 Tla=np.arange(1.,times,1.)
 To=np.arange(1.,times,1.)
@@ -38,24 +38,23 @@ Top1=np.arange(1.,times,1.)
 Ta2=np.arange(1.,times,1.)
 dT=np.zeros(times-1)
 Gh=np.zeros(times-1)
-T2=270
-T02=290
-T12=290
-T00=300.
-T01=300.
-T10=310.
-T11=310.
+#初始溫度
+T02=290#海洋第二層大氣
+T12=290#陸地第二層大氣
+T00=300.#海洋第一層大氣
+T01=300.#陸地第一層大氣
+T10=310.#海洋地表
+T11=310.#陸地地表
 #地表熱容量變化
-dQo=0
-dQl=0
-dQoa=0
-dqla=0
-#對流公式:q=hA(Ta-Ts),5<h<25
-ho=0.6
-hl=2
-h=10
-Ao=1e6
-Al=1e6
+dQo=0#海
+dQl=0#陸
+#對流公式:q=hA(Ta-Ts)
+ho=0.6#水散熱係數
+hl=2#岩石散熱係數
+h=10#自然對流常數
+#地表面積
+Ao=1e6#海
+Al=1e6#陸
 
 #模擬程式
 for i in range(times):
@@ -66,24 +65,22 @@ for i in range(times):
         S0=0
     else:
         S0=1366
+    #第二層大氣
+    T02=round(((T00**4)/2)**0.25,4)#海
+    T12=round(((T01**4)/2)**0.25,4)#陸
 
-    T02=round(((T00**4)/2)**0.25,4)
-    #T02=round(((T00**4)/2+h*(T00-T02)/e/2-4*(T02-T12)/e/2)**0.25,4)
-    T12=round(((T01**4)/2)**0.25,4)
     dQo = round(Sr*(1-a)*Ao-Ao*e*T10**4+Ao*e*T00**4-ho*(T10-T00)*Ao,4)*t#計算水域熱量變化(以初始溫度時為零)
     T00=round(((T10**4)/2+ho*(T10-T00)/e/2-h*(T00-T01)/e/2+(T02**4)/2)**0.25,4)#以熱量平恆計算水域上方大氣溫度
     
     T10+= round(dQo/Mo/Co,4) #以熱量變化計算水域溫度變化
-    #dQoa+=round(e*Ao*(T10**4)+ho*Ao*(T10-T0)-2*e*Ao*T00**4,2)
-    #T00+=round(dQoa/1e9/1.184/Co,2)
     
     dQl = round(Sr*(1-a)*Al-Al*e*T11**4+Al*e*T01**4-hl*(T11-T01)*Al,4)*t#計算陸地熱量變化(以初始溫度時為零)
     
     T01=round(((T11**4)/2+hl*(T11-T01)/e/2-h*(T01-T00)/e/2+(T12**4)/2)**0.25,4)#以熱量平恆計算陸地上方大氣溫度
     T11+= round(dQl/Ml/Cl,4)#以熱量變化計算陸地溫度變化
-    #T02=(T02+T12)/2
-    #T12=T02
+
     theta+=1*t
+    #將結果記錄在陣列中
     Toa[i-1]=T00
     Tla[i-1]=T01
     To[i-1]=T10
